@@ -1,5 +1,9 @@
-# InfraRedes
+# Projeto Infraestrutura de Comunicação
 Repositório destinado ao projeto da cadeira de infraestrutura de comunicação
+
+## 🤓 Como Usar
+
+Em construção...
 
 ## 💻 Grupo 4:
 <table>
