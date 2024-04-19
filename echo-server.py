@@ -1,21 +1,37 @@
 import socket
+import hashlib
 
-#creating echo server
+def calculate_checksum(data):
+    return hashlib.md5(data).hexdigest()
 
-HOST = "127.0.0.1" #endereço de loopback ou local host, estabelece conexão com o proprio pc
+def verify_checksum(received_checksum, data):
+    return received_checksum == calculate_checksum(data)
+
+HOST = "127.0.0.1"
 PORT = 65432
 
-#AF_INET = a familia de endereços de internet IPv4
-#SOCK_stream = socket do tipo TCP ( protocolo de transporte de mensagens)
-
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.bind ((HOST, PORT)) # função que prepara um socket para aceitar conexões entrantes, onde o socket deve ouvir 
-    s.listen() # backlog parameter
+    s.bind((HOST, PORT))
+    s.listen()
+    print("Server started, waiting for connection...")
+    
     conn, addr = s.accept()
     with conn:
         print(f"Connected by {addr}")
+        expected_sequence = 0  # Esperando a sequência inicial
         while True:
             data = conn.recv(1024)
             if not data:
                 break
-            conn.sendall(data)
+            sequence, received_checksum, message = data.decode().split(',', 2)
+            sequence = int(sequence)  # Converter o número de sequência para int
+            if sequence == expected_sequence:
+                if verify_checksum(received_checksum, message.encode()):
+                    response = f"Echo: {message} - Checksum OK - Seq: {sequence}"
+                    expected_sequence += 1  # Incrementa para esperar o próximo número de sequência
+                else:
+                    response = "Checksum Error"
+            else:
+                response = "Sequence Error"
+            conn.sendall(response.encode())
+            print(f"\nData received: {message} \nChecksum: {received_checksum}\n{response}\n")
