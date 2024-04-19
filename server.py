@@ -3,7 +3,6 @@ import threading
 import time
 from header import unpack_header, header_size, calculate_checksum
 
-
 def server_listen(server_socket):
     server_socket.listen(5)
     print("Server listening for connections...")
@@ -20,7 +19,6 @@ def server_listen(server_socket):
             print(f"Error: {e}")
             break
 
-
 def handle_client(client_socket):
     try:
         while True:
@@ -28,10 +26,14 @@ def handle_client(client_socket):
             if not header_data:
                 print("No header received, closing connection...")
                 break
-
+            
             seq_num, ack_num, flags, checksum, payload_len = unpack_header(header_data)
-            payload = client_socket.recv(payload_len)
+            if payload_len > 1024:
+                print("Error: Payload too large")
+                client_socket.sendall(b'Error: Payload too large')
+                continue
 
+            payload = client_socket.recv(payload_len)
             if not payload:
                 print("No payload received, closing connection...")
                 break
@@ -50,16 +52,14 @@ def handle_client(client_socket):
         client_socket.close()
         print("Connection closed.")
 
-
 def create_server(host=socket.gethostname(), port=12345, timeout=60):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((host, port))
     server_socket.settimeout(timeout)  # Timeout para accept()
-
+    
     listener_thread = threading.Thread(target=server_listen, args=(server_socket,))
     listener_thread.start()
     listener_thread.join()
-
 
 if __name__ == '__main__':
     create_server()
