@@ -1,6 +1,7 @@
 import socket
 import threading
 import time
+import header 
 
 def server_listen(server_socket):
     server_socket.listen(5)
@@ -32,7 +33,7 @@ def handle_client(client_socket):
         client_socket.close()
         print("Connection closed.")
 
-def create_server(host='localhost', port=12345, timeout=60):
+def create_server(host=socket.gethostname(), port=12345, timeout=60):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((host, port))
     server_socket.settimeout(timeout)  # Timeout para accept()

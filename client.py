@@ -1,11 +1,12 @@
 import socket
+import header
 
-def create_client(host='localhost', port=12345):
+def create_client(host=socket.gethostname(), port=12345):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.connect((host, port))
         try:
             while True:
-                message = input("Digite a mensagem para enviar ou:\nDigite 1 para simular pacote perdido\nDigite 2 para simular o timeout no cliente")
+                message = input("Digite a mensagem para enviar ou:\nDigite 1 para simular pacote perdido\nDigite 2 para simular o timeout no cliente\nEscreva: ")
                 if message.lower() == 'exit':
                     break
                 sock.sendall(message.encode())
