@@ -1,28 +1,71 @@
 import socket
+import time
 from header import pack_header, calculate_checksum
+
+def send_message(message,sock, ack_num, seq_num):
+    payload = message.encode('utf-8') 
+    checksum = calculate_checksum(payload) 
+    header = pack_header(seq_num, ack_num, 0b00000001, checksum, len(payload))  #pack_header(seq_num, ack_num, flags, checksum, payload_len)
+    packet = header + payload 
+    sock.sendall(packet)  
+    response = sock.recv(1024)  # Recebe a resposta do servidor
+    return response 
 
 
 def create_client(host=socket.gethostname(), port=12345):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.connect((host, port))
         try:
-            seq_num = 1
+            seq_num = 100
+            
             while True:
-                message = input("Digite a mensagem para enviar ou:\nDigite 1 para simular pacote perdido\nDigite 2 para simular o timeout no cliente\nEscreva: ")
-                if message.lower() == 'exit':
+                menu_input= input("Escolha uma opção:\n1 - para enviar uma mensagem íntegra\n2 - para simular pacote perdido\n3 - para simular o timeout no cliente\n4 - para enviar um pacote não integro\n0 - para encerrar o cliente\nDigite sua opção: ")
+                if menu_input.lower() == '0':
                     break
-                payload = message.encode('utf-8')  # criptografa
-                checksum = calculate_checksum(payload)
-                # payload = sock.sendall(message.encode())
-                header = pack_header(seq_num, 0, 0b00000001, checksum, len(payload))
-                packet = header + payload
-                sock.sendall(packet)
-                response = sock.recv(1024)  # maximum amount of data to be received at once
+                if menu_input.lower() == '1':
+                    message = input("Digite sua mensagem: ")
+                    ack_num = 1 
+                    response = send_message(message, sock, ack_num, seq_num)
+
+                    if response == b'ACK1':
+                        time.sleep(4)
+                        print(f"\nACK1 received from server! Message received successfuly! (seq_num: {seq_num})\n")
+                        sock.sendall("ACK1c".encode())
+                        time.sleep(2)
+                        print(f"ACK1c sent to server. (seq_num: {seq_num})\n")
+
+                if menu_input.lower() == '4':
+                    ack_num = 4 
+                    message = input("Digite sua mensagem: ")
+                    response = send_message(message, sock, ack_num, seq_num)
+                    
+                    if response == b'ACK1':
+                        time.sleep(4)
+                        print(f"\nACK1 received from server! Message received successfuly! (seq_num: {seq_num})\n")
+                        sock.sendall("ACK1c".encode())
+                        time.sleep(2)
+                        print(f"ACK1c sent to server. (seq_num: {seq_num})\n")
+                    elif response == b'ACK4':
+                        time.sleep(5)
+                        print(f"ACK4 received from server. Packet compromised, sent it again. (seq_num: {seq_num})\n")
+                        ack_num = 1 
+                        response = send_message(message, sock, ack_num, seq_num)
+                        print(f"Packet sent again. (seq_num: {seq_num})")
+                        time.sleep(2)
+                        if response == b'ACK1':
+                            time.sleep(4)
+                            print(f"\nACK1 received from server! Message received successfuly! (seq_num: {seq_num})\n")
+                            sock.sendall("ACK1c".encode())
+                            time.sleep(2)
+                            print(f"ACK1c sent to server. (seq_num: {seq_num})\n")
+
+                    else:
+                        print(f"No ACK, resending. (seq_num: {seq_num})\n")
+                if menu_input.lower() == '2':
+                    response = send_message(sock, seq_num)
+                
                 seq_num += 1
-                if response == b'ACK':
-                    print(f"ACK received!, {seq_num}")
-                else:
-                    print("No ACK, resending...")
+                time.sleep(4)
         finally:
             print("Closing connection")
             sock.close()
