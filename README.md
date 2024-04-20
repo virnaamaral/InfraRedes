@@ -17,16 +17,44 @@ confiável de dados, descritas abaixo em [Funcionalidades](#funcionalidades)
 
 > Confira nosso protocolo de aplicação proposto, com as requisições e respostas descritas, acessível abaixo em [Protocolo de Aplicação](#protocolo-de-aplicação)
 
+## 🤓 Como Usar?
+
+1. **Instalação do Python**:
+> Certifique-se de ter o Python instalado em seu sistema.
+
+2. **Execução do Servidor**:
+> Em um terminal ou prompt de comando, navegue até o diretório onde você salvou o arquivo `server.py`, e execute o servidor digitando:
+>- Windows/Linux: `python server.py`
+>- MacOs: `python3 server.py`
+
+3. **Execução do Cliente**:
+> Em outro terminal ou prompt de comando (ou uma nova janela no mesmo terminal), navegue até o diretório onde você salvou o arquivo `client.py`, e execute o cliente digitando:
+>- Windows/Linux: `python client.py`
+>- MasOs: `python3 client.py`
+
+4. **Interagindo com o Cliente**:
+> No menu do Cliente, serão ofertados várias opções, como enviar mensagens ou simular falhas
+> Você pode escolher enviar mensagens íntegras, simular pacotes perdidos, simular timeout no cliente, enviar pacotes não íntegros, ou encerrar o Cliente.
+
+5. **Observando a Comunicação**:
+> Enquanto o Cliente e o Servidor estiverem em execução, o terminal do Servidor mostrará as mensagens de comunicação e os logs de eventos.
+>- O servidor estará aguardando conexões e processando as mensagens recebidas do cliente
+>- O cliente enviará mensagens de acordo com suas escolhas no menu
+
+6. **Encerrando a Execução**:
+> O Cliente será encerrado ao digitar *0* no menu.
+>- O servidor e o cliente serão encerrados, e mensagens indicando o fechamento da conexão serão mostradas nos respectivos terminais.
+
 ## Funcionalidades
 
 - Soma de verificação
 - Temporizador
 - Número de sequência
 - Reconhecimento
+- Reconhecimento negativo
 
 - Em Construção...
-  - Reconhecimento negativo
-  - Janela, paralelismo
+  - Janela e paralelismo
   - Método de checagem de integridade
 
 ## Protocolo de Aplicação
@@ -118,9 +146,6 @@ Utiliza a biblioteca *struct* para empacotar e desempacotar os dados de acordo c
 > `pack_header(seq_num, ack_num, flags, checksum, payload_len)`: Empacota os campos do cabeçalho em um formato específico.
 
 > `unpack_header(header_bytes)`: Desempacota os dados do cabeçalho a partir de bytes recebidos.
-
-## 🤓 Como Usar?
-
 
 ## 💻 Grupo 4:
 <table>
