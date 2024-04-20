@@ -47,21 +47,22 @@ confiável de dados, descritas abaixo em [Funcionalidades](#funcionalidades)
 
 ## Funcionalidades
 
-- **Soma de verificação**: É um método usado para verificar a integridade dos dados transmitidos em uma rede.
+- **Soma de verificação**: É o método usado para verificar a integridade dos dados transmitidos em uma rede.
   > Envolve somar todos os bytes de dados em um pacote e calcular um valor de verificação, que é enviado junto com os dados, sendo recalculado pelo destinatário para verificar se os dados foram corrompidos durante a transmissão
 
-- **Temporizador**: É um mecanismo usado em comunicações de rede para controlar o tempo de espera por uma resposta.
+- **Temporizador**: É o mecanismo usado para controlar o tempo de espera por uma resposta.
   >- Quando um dispositivo envia dados, é definido um temporizador para aguardar uma resposta dentro de um determinado período
-  >- Se a resposta não for recebida dentro desse tempo, o temporizador expira e o dispositivo toma medidas, como retransmitir os dados (Cliente) ou encerrar a conexão (Servidor)
+  >- Se a resposta não for recebida dentro desse tempo, o temporizador expira e o dispositivo retransmite os dados
 
 - **Número de sequência**: É uma sequência de números usados para identificar e ordenar mensagens transmitidas em uma rede.
   > Cada mensagem é atribuída a um número de sequência único, que é usado pelo receptor para reconstruir a ordem das mensagens e detectar a perda ou duplicação de mensagens
 
-- **Reconhecimento**: É um mecanismo usado para confirmar a recepção de dados.
+- **Reconhecimento**: É o mecanismo usado para confirmar a recepção de dados.
     > Quando um dispositivo recebe dados, ele envia de volta um reconhecimento (ACK) para informar ao remetente que os dados foram recebidos com sucesso, ajudando no controle de fluxo e na garantia de entrega de dados.
 
+- _**Reconhecimento negativo**_: É o tipo de resposta enviada pelo destinatário para indicar que houve um problema na recepção dos dados.
+
 - **Em Construção...**
-  - _**Reconhecimento negativo**_: É um tipo de resposta enviada pelo destinatário para indicar que houve um problema na recepção dos dados.
   - _**Janela e paralelismo**_: É um conceito usado para limitar o número de pacotes que podem ser enviados sem aguardar um reconhecimento, o que permite um certo paralelismo na transmissão de dados, fazendo com que o remetente envie vários pacotes antes de receber um reconhecimento.
   - _**Método de checagem de integridade**_: Métodos usados para garantir que os dados transmitidos não tenham sido corrompidos ou alterados durante a transmissão.
 
@@ -72,7 +73,7 @@ Aqui definimos e explicamos o desenvolvimento das regras e procedimentos que o C
 Abaixo, temos cada elemento que deve ser considerado segundo o protocolo desenvolvido:
 
 1. **Conexão e Endereçamento**: O Cliente se conecta ao Servidor utilizando o host local `socket.gethostname()` e a porta 12345 por padrão, conforme especificado nos códigos `create_server()` e `create_client()`. Isso significa que a comunicação ocorre na mesma máquina, a menos que você especifique um IP diferente para o *host*.
-Porém, o `socket.gethostname()` faz com que, de forma automática, a porta do Servidor seja uma aleatória da máquina, esperarando por conexões (server_socket.bind((host, port))).
+Porém, o `socket.gethostname()` faz com que, de forma automática, a porta do Servidor seja uma aleatória da máquina, esperarando por conexões (`server_socket.bind((host, port))`).
 
     - Parâmetros e Valores Default:
       - `host = socket.gethostname()`:
@@ -87,31 +88,35 @@ Porém, o `socket.gethostname()` faz com que, de forma automática, a porta do S
         
         > O número *12345* é um valor padrão para a porta se nenhum outro for especificado no momento da chamada da função
 
-      - `timeout = 45`:
+      - `timeout = 5`:
         > *timeout* é um parâmetro que define um limite de tempo (em segundos) que o servidor esperará por uma conexão antes de gerar uma exceção de *timeout* se nenhuma conexão for estabelecida
 
-        > O valor *45* é um valor padrão, indicando que o servidor esperará por conexões durante 45 segundos antes de desistir temporariamente
+        > O valor *5* é o valor estipulado que indica que o cliente esperará por conexões durante 5 segundos antes de desistir temporariamente
 
 2. **Formato das Mensagens**: O formato das mensagens inclui um cabeçalho definido pelo arquivo `header.py`. O cabeçalho possui os seguintes campos:
     - Número de sequência (*seq_num*): identifica a ordem das mensagens
     - Número de reconhecimento (*ack_num*): confirma o recebimento de mensagens
-    - Flags: utilizadas para controle de fluxo e detecção de erros
+    - *flags*: utilizadas para controle de fluxo e detecção de erros
     - Soma de verificação (*checksum*): verifica a integridade dos dados
     - Comprimento do payload (*payload_len*): indica o tamanho dos dados enviados
 
-      > *Além do cabeçalho, as mensagens contêm dados de payload, como mensagens de texto digitadas pelo usuário*
+      > Além do cabeçalho, as mensagens contêm dados de payload, como mensagens de texto digitadas pelo usuário
 
 3. **Início e Término da Comunicação**: A comunicação é iniciada quando o Cliente se conecta ao Servidor usando `sock.connect((host, port))`, portanto a conexão estabelecida já inicia a comunicação. Já o término da comunicação pode ocorrer quando o usuário escolhe a opção *0* para encerrar o Cliente (`menu_input.lower() == '0'`)
     > A conexão é fechada quando o Cliente encerra
 
 4. **Controle de Fluxo e Erro**:
-    - Soma de Verificação: A soma de verificação é calculada utilizando a função `calculate_checksum(data)` no Cliente e verificada no Servidor, para garantir a integridade dos dados
-    - Temporizador: São usados para gerenciar timeouts. O Servidor define um *timeout* para aceitar conexões `client_socket.settimeout(45)` e o `cliente usa time.sleep()` para esperar antes de retransmitir, em caso de erros
-    - Número de Sequência e Reconhecimento: Os números de sequência são atribuídos às mensagens para identificar sua ordem, sendo os reconhecimentos utilizados para confirmar o recebimento das mensagens pelo servidor, incluindo o envio de *ACK1* ou *ACK4* dependendo do estado da mensagem recebida
-    - Janela de Transmissão: 
+    - *Soma de Verificação*: A soma de verificação é calculada utilizando a função `calculate_checksum(data)` no Cliente e verificada no Servidor, para garantir a integridade dos dados
+    - *Temporizador*: São usados para gerenciar timeouts. O Servidor define um *timeout* para aceitar conexões `flag_timeout_client = 0` e o cliente, ao ser cirado, define um timeout limite para esperar antes de retransmitir, em caso de erros
+    - *Número de Sequência e Reconhecimento*: Os números de sequência são atribuídos às mensagens para identificar sua ordem, sendo os reconhecimentos utilizados para confirmar o recebimento das mensagens pelo servidor, incluindo o envio de *ACK1* ou *ACK4* dependendo do estado da mensagem recebida
+    - *Janela de Transmissão*: 
 
 5. **Simulação de Falhas**: É feita através das opções no menu do Cliente.
-    - A opção *2* simula um pacote perdido, enquanto a opção *4* simula um pacote não íntegro, ambos feitos deliberadamente para testar o comportamento do protocolo em situações de erro
+    - A opção 4 simula um pacote não íntegro, feito deliberadamente para testar o comportamento do protocolo em situações de erro
+    - Já a opção 3 simula o timeout do cliente, implementando um mecanismo para lidar com situações em que a resposta do Servidor demora mais do que o esperado, evitando que o Cliente fique indefinidamente esperando por uma resposta que pode não chegar.
+      - No Cliente definiu-se um limite de tempo de *5 segundos* para esperar por uma resposta do Servidor
+      - Se o Cliente não receber uma resposta dentro do tempo limite especificado, ele assume que houve uma falha na transmissão e retransmite a mensagem
+        > Vale ressaltar que, durante a execução, o Cliente informa ao usuário sobre o status das mensagens enviadas e se houve algum timeout detectado
     - A falha de integridade é simulada alterando o *checksum* do pacote no servidor `if ack_num == 4: checksum = checksum + 1`
 
 6. **Configuração do Servidor para Respostas**: O Servidor responde ao Cliente com mensagens de *ACK1* ou *ACK4* para confirmar o recebimento e integridade das mensagens, utilizadas pelo Cliente para determinar se a mensagem foi entregue com sucesso ou se precisa ser retransmitida.

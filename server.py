@@ -51,8 +51,6 @@ def handle_client(client_socket):
                 checksum = checksum + 1
 
             if flag_timeout_client == 0:
-                
-
                 if checksum != received_checksum:
                     time.sleep(2)
                     print(f"Checksum error, corrupt package! (seq_num: {seq_num})\n")
