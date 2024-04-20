@@ -30,7 +30,7 @@ confiável de dados, descritas abaixo em [Funcionalidades](#funcionalidades)
 3. **Execução do Cliente**:
     > Em outro terminal ou prompt de comando (ou uma nova janela no mesmo terminal), navegue até o diretório onde você salvou o arquivo `client.py`, e execute o cliente digitando:
     >- Windows/Linux: `python client.py`
-    >- MasOs: `python3 client.py`
+    >- MacOs: `python3 client.py`
 
 4. **Interagindo com o Cliente**:
     > No menu do Cliente, serão ofertados várias opções, como enviar mensagens ou simular falhas
