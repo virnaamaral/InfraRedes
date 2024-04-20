@@ -70,7 +70,6 @@ def handle_client(client_socket):
 
             else:
                 print(f"Unexpected response or no ACK1 received send it again. (seq_num: {seq_num})\n")
-    
 
     except socket.timeout:
         print("Client inactive, closing connection.")

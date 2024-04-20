@@ -11,7 +11,6 @@ def send_message(message,sock, ack_num, seq_num):
     response = sock.recv(1024)  # Recebe a resposta do servidor
     return response 
 
-
 def create_client(host=socket.gethostname(), port=12345):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.connect((host, port))
@@ -69,7 +68,6 @@ def create_client(host=socket.gethostname(), port=12345):
         finally:
             print("Closing connection")
             sock.close()
-
 
 if __name__ == '__main__':
     create_client()
