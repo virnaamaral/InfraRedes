@@ -10,7 +10,7 @@ def server_listen(server_socket):
         try:
             client_socket, addr = server_socket.accept()
             print(f"Connected by {addr}\n")
-            client_socket.settimeout(60)  # Timeout para recv()
+            client_socket.settimeout(120)  # Timeout para recv()
             handle_client(client_socket)
         except socket.timeout:
             print("No connections within the timeout period.\n")
@@ -19,7 +19,23 @@ def server_listen(server_socket):
             print(f"Error: {e}")
             break
 
+
+def stopwatch_20s():
+    flag_times_up = 1
+    start_time = time.time()
+    end_time = start_time + 5  # Set the end time for 20 seconds
+
+    while time.time() < end_time:
+        current_time = time.time()
+        elapsed_time = current_time - start_time
+
+        time.sleep(0.1)  # Add a slight delay to make the output smoother
+
+    return flag_times_up
+
+
 def handle_client(client_socket):
+    flag_timeout_client = 0
     try:
         while True:
             header_data = client_socket.recv(header_size)
@@ -35,7 +51,14 @@ def handle_client(client_socket):
                 break
 
             received_checksum = calculate_checksum(payload)
-            
+
+            if ack_num == 3:
+                flag_timeout_client = 1
+                time.sleep(2)
+                print("Sleeping for 2 seconds...\n")
+
+            print("hi")
+
             if ack_num == 4:
                 checksum = checksum + 1
 
@@ -47,7 +70,7 @@ def handle_client(client_socket):
                 print(f"ACK4 sent to cliente! Packet compromised! (seq_num: {seq_num})\n")
                 continue
 
-            time.sleep(6)
+            #time.sleep(2)
             data = payload.decode('utf-8')
             print(f"Received data: {data} (seq_num: {seq_num})\n")
             client_socket.sendall(b'ACK1')
@@ -69,7 +92,7 @@ def handle_client(client_socket):
         client_socket.close()
         print("Socket closed.")
 
-def create_server(host=socket.gethostname(), port=12345, timeout=60):
+def create_server(host=socket.gethostname(), port=12345, timeout=120):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((host, port))
     server_socket.settimeout(timeout)  # Timeout para accept()
