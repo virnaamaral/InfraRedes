@@ -13,7 +13,21 @@ def send_message(message,sock, ack_num, seq_num):
     packet = header + payload 
     sock.sendall(packet) 
     response = sock.recv(1024)  # Recebe a resposta do servidor
-    return response 
+    return response
+
+
+def stopwatch_20s():
+    flag_times_up = 1
+    start_time = time.time()
+    end_time = start_time + 20  # Set the end time for 20 seconds
+
+    while time.time() < end_time:
+        current_time = time.time()
+        elapsed_time = current_time - start_time
+
+        time.sleep(0.1)  # Add a slight delay to make the output smoother
+
+    return flag_times_up
 
 def create_client(host=socket.gethostname(), port=12345):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -22,14 +36,16 @@ def create_client(host=socket.gethostname(), port=12345):
             seq_num = 100
             
             while True:
-                menu_input= input("Escolha uma opção:\n1 - para enviar uma mensagem íntegra\n2 - para simular pacote perdido\n3 - para simular o timeout no cliente\n4 - para enviar um pacote não integro\n0 - para encerrar o cliente\nDigite sua opção: ")
+                menu_input = input("Escolha uma opção:\n1 - para enviar uma mensagem íntegra\n"
+                                   "2 - para simular pacote perdido\n3 - para simular o timeout no cliente\n"
+                                   "4 - para enviar um pacote não integro\n0 - para encerrar o cliente"
+                                   "\nDigite sua opção: ")
                 if menu_input.lower() == '0':
                     break
                 if menu_input.lower() == '1':
                     message = input("Digite sua mensagem: ")
                     ack_num = 1 
                     response = send_message(message, sock, ack_num, seq_num)
-
 
                     if response == b'ACK1':
                         time.sleep(4)
@@ -39,8 +55,27 @@ def create_client(host=socket.gethostname(), port=12345):
                         print(f"ACK1c sent to server. (seq_num: {seq_num})\n")
                     elif response == b'payload_error':
                         print("Message exceeds pay load. Packet dumped, sent a shorter message.")
+
                 if menu_input.lower() == '2':
-                    response = send_message(sock, seq_num)
+                    ack_num = 2
+                    message = input("Digite sua mensagem: ")
+                    response = send_message(message, sock, ack_num, seq_num)
+
+                if menu_input.lower() == '3':
+                    ack_num = 3
+                    message = input("Digite sua mensagem: ")
+                    response = send_message(message, sock, ack_num, seq_num)
+                    time.sleep(2)
+                    print("No response from server, resending message...")
+                    ack_num = 1
+                    response = send_message(message, sock, ack_num, seq_num)
+
+                    if response == b'ACK1':
+                        time.sleep(4)
+                        print(f"\nACK1 received from server! Message received successfuly! (seq_num: {seq_num})\n")
+                        sock.sendall("ACK1c".encode())
+                        time.sleep(2)
+                        print(f"ACK1c sent to server. (seq_num: {seq_num})\n")
 
                 if menu_input.lower() == '4':
                     ack_num = 4 
@@ -69,7 +104,6 @@ def create_client(host=socket.gethostname(), port=12345):
 
                     else:
                         print(f"No ACK, resending. (seq_num: {seq_num})\n")
-                
                 
                 seq_num += 1
                 time.sleep(4)
