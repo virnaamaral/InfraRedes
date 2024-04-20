@@ -3,41 +3,33 @@ import time
 from header import pack_header, calculate_checksum
 
 def send_message(message,sock, ack_num, seq_num):
-    payload = message.encode('utf-8') 
-    checksum = calculate_checksum(payload) 
-    header = pack_header(seq_num, ack_num, 0b00000001, checksum, len(payload))  #pack_header(seq_num, ack_num, flags, checksum, payload_len)
-    max_payload_size = 1024  # Tamanho máximo que seu servidor pode lidar por pacote
-    if len(payload) > max_payload_size:
-        return b'payload_error'
-    
-    packet = header + payload 
-    sock.sendall(packet) 
-    response = sock.recv(1024)  # Recebe a resposta do servidor
-    return response
+    try:
+        payload = message.encode('utf-8') 
+        checksum = calculate_checksum(payload) 
+        header = pack_header(seq_num, ack_num, 0b00000001, checksum, len(payload))  #pack_header(seq_num, ack_num, flags, checksum, payload_len)
+        max_payload_size = 1024  # Tamanho máximo que seu servidor pode lidar por pacote
+        if len(payload) > max_payload_size:
+            return b'payload_error'
+        
+        packet = header + payload 
+        sock.sendall(packet) 
+        response = sock.recv(1024)  # Recebe a resposta do servidor
+        return response
+    except socket.timeout:
+        print(f"\nTimeout: O servidor não respondeu a tempo. (seq_num: {seq_num})\n")
+        return None
 
 
-def stopwatch_20s():
-    flag_times_up = 1
-    start_time = time.time()
-    end_time = start_time + 20  # Set the end time for 20 seconds
-
-    while time.time() < end_time:
-        current_time = time.time()
-        elapsed_time = current_time - start_time
-
-        time.sleep(0.1)  # Add a slight delay to make the output smoother
-
-    return flag_times_up
-
-def create_client(host=socket.gethostname(), port=12345):
+def create_client(host=socket.gethostname(), port=12345, timeout = 5):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.connect((host, port))
+        sock.settimeout(timeout)
         try:
             seq_num = 100
             
             while True:
                 menu_input = input("Escolha uma opção:\n1 - para enviar uma mensagem íntegra\n"
-                                   "2 - para simular pacote perdido\n3 - para simular o timeout no cliente\n"
+                                   "2 - para simular e paralelismo\n3 - para simular o timeout no cliente\n"
                                    "4 - para enviar um pacote não integro\n0 - para encerrar o cliente"
                                    "\nDigite sua opção: ")
                 if menu_input.lower() == '0':
@@ -65,8 +57,9 @@ def create_client(host=socket.gethostname(), port=12345):
                     ack_num = 3
                     message = input("Digite sua mensagem: ")
                     response = send_message(message, sock, ack_num, seq_num)
-                    time.sleep(2)
-                    print("No response from server, resending message...")
+                    
+                    
+                    print(f"No response from server, resending message. (seq_num: {seq_num})\n")
                     ack_num = 1
                     response = send_message(message, sock, ack_num, seq_num)
 
