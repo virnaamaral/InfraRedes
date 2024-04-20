@@ -18,7 +18,11 @@ def send_message(message,sock, ack_num, seq_num):
     except socket.timeout:
         print(f"\nTimeout: O servidor não respondeu a tempo. (seq_num: {seq_num})\n")
         return None
+def create_message():
+    return
 
+def send_batch():
+    return
 
 def create_client(host=socket.gethostname(), port=12345, timeout = 5):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -49,8 +53,13 @@ def create_client(host=socket.gethostname(), port=12345, timeout = 5):
                         print("Message exceeds pay load. Packet dumped, sent a shorter message.")
 
                 if menu_input.lower() == '2':
-                    ack_num = 2
+                    #vc recever confirmação por mensagem ou por grupo?
+                    # while para receber mesnagem
+                    #message[]
+                    #msg_len = len(messagem)
+                    
                     message = input("Digite sua mensagem: ")
+
                     response = send_message(message, sock, ack_num, seq_num)
 
                 if menu_input.lower() == '3':
