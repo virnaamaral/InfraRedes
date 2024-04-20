@@ -99,7 +99,7 @@ Porém, o `socket.gethostname()` faz com que, de forma automática, a porta do S
     - Soma de verificação (*checksum*): verifica a integridade dos dados
     - Comprimento do payload (*payload_len*): indica o tamanho dos dados enviados
 
-    > *Além do cabeçalho, as mensagens contêm dados de payload, como mensagens de texto digitadas pelo usuário*
+      > *Além do cabeçalho, as mensagens contêm dados de payload, como mensagens de texto digitadas pelo usuário*
 
 3. **Início e Término da Comunicação**: A comunicação é iniciada quando o Cliente se conecta ao Servidor usando `sock.connect((host, port))`, portanto a conexão estabelecida já inicia a comunicação. Já o término da comunicação pode ocorrer quando o usuário escolhe a opção *0* para encerrar o Cliente (`menu_input.lower() == '0'`)
     > A conexão é fechada quando o Cliente encerra
