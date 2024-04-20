@@ -60,7 +60,7 @@ confiável de dados, descritas abaixo em [Funcionalidades](#funcionalidades)
 - **Reconhecimento**: É o mecanismo usado para confirmar a recepção de dados.
     > Quando um dispositivo recebe dados, ele envia de volta um reconhecimento (ACK) para informar ao remetente que os dados foram recebidos com sucesso, ajudando no controle de fluxo e na garantia de entrega de dados.
 
-- _**Reconhecimento negativo**_: É o tipo de resposta enviada pelo destinatário para indicar que houve um problema na recepção dos dados.
+- **Reconhecimento negativo**: É o tipo de resposta enviada pelo destinatário para indicar que houve um problema na recepção dos dados.
 
 - **Em Construção...**
   - _**Janela e paralelismo**_: É um conceito usado para limitar o número de pacotes que podem ser enviados sem aguardar um reconhecimento, o que permite um certo paralelismo na transmissão de dados, fazendo com que o remetente envie vários pacotes antes de receber um reconhecimento.
