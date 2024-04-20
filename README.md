@@ -31,6 +31,45 @@ confiável de dados, descritas abaixo em [Funcionalidades](#funcionalidades)
 
 ## Protocolo de Aplicação
 
+## Explicando os Arquivos
+
+### `server.py`
+Responsável por implementar um servidor que fica ouvindo por conexões de clientes.
+
+Utiliza a biblioteca *socket* para comunicação em rede, *threading* para lidar com múltiplas conexões simultaneamente e funções definidas no arquivo `header.py` para manipular o cabeçalho dos pacotes de dados.
+
+- Funções do `server.py`
+
+> `server_listen(server_socket)`: Responsável por aceitar conexões de clientes e iniciar a comunicação com cada cliente conectado
+
+> `handle_client(client_socket)`: Onde a comunicação real com cada Cliente acontece, incluindo a recepção e envio de dados, verificação de checksum, tratamento de erros e controle de fluxo
+
+> `create_server(host, port, timeout)`: Cria o socket do servidor, faz o bind com o endereço e porta especificados, e inicia a escuta por conexões utilizando uma thread.
+
+### `client.py`
+Implementa o Cliente que se conecta ao servidor para enviar e receber mensagens.
+
+Utiliza a biblioteca *socket* para comunicação em rede, além das funções definidas no arquivo `header.py` para empacotar o cabeçalho dos pacotes de dados.
+
+- Funções do `client.py`
+
+> `send_message(message, sock, ack_num, seq_num)`: Empacota a mensagem junto com o cabeçalho, calcula o checksum, envia o pacote para o servidor e espera por uma resposta
+
+> `create_client(host, port)`: Onde o cliente é criado, conectando-se ao servidor, e interagindo com o usuário para enviar mensagens ou simular diferentes cenários de comunicação (como pacotes perdidos ou timeout).
+
+### `header.py`
+Contém funções utilitárias para manipular o cabeçalho dos pacotes de dados.
+
+Utiliza a biblioteca *struct* para empacotar e desempacotar os dados de acordo com um formato específico definido em *header_format*.
+
+- Funções do `header.py`
+
+> `calculate_checksum(data)`: Calcula o checksum dos dados passados como argumento.
+
+> `pack_header(seq_num, ack_num, flags, checksum, payload_len)`: Empacota os campos do cabeçalho em um formato específico.
+
+> `unpack_header(header_bytes)`: Desempacota os dados do cabeçalho a partir de bytes recebidos.
+
 ## 🤓 Como Usar?
 
 
