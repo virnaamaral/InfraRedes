@@ -1,11 +1,11 @@
 # Projeto Infraestrutura de Comunicação
 Projeto desenvolvido para a disciplina de Infraestrutura de Comunicação, na graduação em Ciência da Computação na [CESAR School](https://www.cesar.school)
 
-## O que é?
+## 🧐 O que é?
 
 Uma aplicação Cliente-Servidor que, na camada de Aplicação, fornece um transporte confiável de dados, considerando um canal com perdas de dados e erros.
 
-## Como funciona?
+## 💡 Como funciona?
 - O Cliente se conecta ao Servidor através do localhost (quando na mesma máquina) ou via IP, esta comunicação ocorrendo via sockets.
 
 - O programa abarca o envio de pacotes da camada de aplicação de forma Isolada, a partir do Cliente, ou em Lotes, com destino ao Servidor, que pode confirmar a recepção de forma individual ou a recepção em Grupo dessas mensagens (aceita ambas as configurações)
@@ -20,44 +20,52 @@ confiável de dados, descritas abaixo em [Funcionalidades](#funcionalidades)
 ## 🤓 Como Usar?
 
 1. **Instalação do Python**:
-> Certifique-se de ter o Python instalado em seu sistema.
+    > Certifique-se de ter o Python instalado em seu sistema.
 
 2. **Execução do Servidor**:
-> Em um terminal ou prompt de comando, navegue até o diretório onde você salvou o arquivo `server.py`, e execute o servidor digitando:
->- Windows/Linux: `python server.py`
->- MacOs: `python3 server.py`
+    > Em um terminal ou prompt de comando, navegue até o diretório onde você salvou o arquivo `server.py`, e execute o servidor digitando:
+    >- Windows/Linux: `python server.py`
+    >- MacOs: `python3 server.py`
 
 3. **Execução do Cliente**:
-> Em outro terminal ou prompt de comando (ou uma nova janela no mesmo terminal), navegue até o diretório onde você salvou o arquivo `client.py`, e execute o cliente digitando:
->- Windows/Linux: `python client.py`
->- MasOs: `python3 client.py`
+    > Em outro terminal ou prompt de comando (ou uma nova janela no mesmo terminal), navegue até o diretório onde você salvou o arquivo `client.py`, e execute o cliente digitando:
+    >- Windows/Linux: `python client.py`
+    >- MasOs: `python3 client.py`
 
 4. **Interagindo com o Cliente**:
-> No menu do Cliente, serão ofertados várias opções, como enviar mensagens ou simular falhas
-> Você pode escolher enviar mensagens íntegras, simular pacotes perdidos, simular timeout no cliente, enviar pacotes não íntegros, ou encerrar o Cliente.
+    > No menu do Cliente, serão ofertados várias opções, como enviar mensagens ou simular falhas
+    > Você pode escolher enviar mensagens íntegras, simular pacotes perdidos, simular timeout no cliente, enviar pacotes não íntegros, ou encerrar o Cliente
 
 5. **Observando a Comunicação**:
-> Enquanto o Cliente e o Servidor estiverem em execução, o terminal do Servidor mostrará as mensagens de comunicação e os logs de eventos.
->- O servidor estará aguardando conexões e processando as mensagens recebidas do cliente
->- O cliente enviará mensagens de acordo com suas escolhas no menu
+    > Enquanto o Cliente e o Servidor estiverem em execução, o terminal do Servidor mostrará as mensagens de comunicação e os logs de eventos.
+    >- O servidor estará aguardando conexões e processando as mensagens recebidas do cliente
+    >- O cliente enviará mensagens de acordo com suas escolhas no menu
 
 6. **Encerrando a Execução**:
-> O Cliente será encerrado ao digitar *0* no menu.
->- O servidor e o cliente serão encerrados, e mensagens indicando o fechamento da conexão serão mostradas nos respectivos terminais.
+    > O Cliente será encerrado ao digitar *0* no menu
+    >- O servidor e o cliente serão encerrados, e mensagens indicando o fechamento da conexão serão mostradas nos respectivos terminais
 
-## Funcionalidades
+## ⚙️ Funcionalidades
 
-- Soma de verificação
-- Temporizador
-- Número de sequência
-- Reconhecimento
-- Reconhecimento negativo
+- **Soma de verificação**: É um método usado para verificar a integridade dos dados transmitidos em uma rede.
+  > Envolve somar todos os bytes de dados em um pacote e calcular um valor de verificação, que é enviado junto com os dados, sendo recalculado pelo destinatário para verificar se os dados foram corrompidos durante a transmissão
 
-- Em Construção...
-  - Janela e paralelismo
-  - Método de checagem de integridade
+- **Temporizador**: É um mecanismo usado em comunicações de rede para controlar o tempo de espera por uma resposta.
+  >- Quando um dispositivo envia dados, é definido um temporizador para aguardar uma resposta dentro de um determinado período
+  >- Se a resposta não for recebida dentro desse tempo, o temporizador expira e o dispositivo toma medidas, como retransmitir os dados (Cliente) ou encerrar a conexão (Servidor)
 
-## Protocolo de Aplicação
+- **Número de sequência**: É uma sequência de números usados para identificar e ordenar mensagens transmitidas em uma rede.
+  > Cada mensagem é atribuída a um número de sequência único, que é usado pelo receptor para reconstruir a ordem das mensagens e detectar a perda ou duplicação de mensagens
+
+- **Reconhecimento**: É um mecanismo usado para confirmar a recepção de dados.
+    > Quando um dispositivo recebe dados, ele envia de volta um reconhecimento (ACK) para informar ao remetente que os dados foram recebidos com sucesso, ajudando no controle de fluxo e na garantia de entrega de dados.
+
+- **Em Construção...**
+  - _**Reconhecimento negativo**_: É um tipo de resposta enviada pelo destinatário para indicar que houve um problema na recepção dos dados.
+  - _**Janela e paralelismo**_: É um conceito usado para limitar o número de pacotes que podem ser enviados sem aguardar um reconhecimento, o que permite um certo paralelismo na transmissão de dados, fazendo com que o remetente envie vários pacotes antes de receber um reconhecimento.
+  - _**Método de checagem de integridade**_: Métodos usados para garantir que os dados transmitidos não tenham sido corrompidos ou alterados durante a transmissão.
+
+## 📐 Protocolo de Aplicação
 
 Aqui definimos e explicamos o desenvolvimento das regras e procedimentos que o Cliente e o Servidor seguirão para comunicar-se efetivamente, garantindo um transporte confiável de dados sobre uma rede que pode estar sujeita a perdas de dados e erros.
 
@@ -108,7 +116,7 @@ Porém, o `socket.gethostname()` faz com que, de forma automática, a porta do S
 
 6. **Configuração do Servidor para Respostas**: O Servidor responde ao Cliente com mensagens de *ACK1* ou *ACK4* para confirmar o recebimento e integridade das mensagens, utilizadas pelo Cliente para determinar se a mensagem foi entregue com sucesso ou se precisa ser retransmitida.
 
-## Explicando os Arquivos
+## 🗂️ Explicando os Arquivos
 
 ### `server.py`
 Responsável por implementar um servidor que fica ouvindo por conexões de clientes.
