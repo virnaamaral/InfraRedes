@@ -10,7 +10,7 @@ def server_listen(server_socket):
         try:
             client_socket, addr = server_socket.accept()
             print(f"Connected by {addr}\n")
-            client_socket.settimeout(45)  # Timeout para recv()
+            client_socket.settimeout(60)  # Timeout para recv()
             handle_client(client_socket)
         except socket.timeout:
             print("No connections within the timeout period.\n")
@@ -28,12 +28,6 @@ def handle_client(client_socket):
                 break
             
             seq_num, ack_num, flags, checksum, payload_len = unpack_header(header_data)
-            
-
-            if payload_len > 1024:
-                print("Error: Payload too large\n")
-                client_socket.sendall(b'Error: Payload too large\n')
-                continue
 
             payload = client_socket.recv(payload_len)
             if not payload:
@@ -51,7 +45,6 @@ def handle_client(client_socket):
                 client_socket.sendall(b'ACK4')
                 time.sleep(2)
                 print(f"ACK4 sent to cliente! Packet compromised! (seq_num: {seq_num})\n")
-                
                 continue
 
             time.sleep(6)
@@ -76,7 +69,7 @@ def handle_client(client_socket):
         client_socket.close()
         print("Socket closed.")
 
-def create_server(host=socket.gethostname(), port=12345, timeout=45):
+def create_server(host=socket.gethostname(), port=12345, timeout=60):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((host, port))
     server_socket.settimeout(timeout)  # Timeout para accept()

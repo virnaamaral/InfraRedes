@@ -6,8 +6,12 @@ def send_message(message,sock, ack_num, seq_num):
     payload = message.encode('utf-8') 
     checksum = calculate_checksum(payload) 
     header = pack_header(seq_num, ack_num, 0b00000001, checksum, len(payload))  #pack_header(seq_num, ack_num, flags, checksum, payload_len)
+    max_payload_size = 1024  # Tamanho máximo que seu servidor pode lidar por pacote
+    if len(payload) > max_payload_size:
+        return b'payload_error'
+    
     packet = header + payload 
-    sock.sendall(packet)  
+    sock.sendall(packet) 
     response = sock.recv(1024)  # Recebe a resposta do servidor
     return response 
 
@@ -26,12 +30,17 @@ def create_client(host=socket.gethostname(), port=12345):
                     ack_num = 1 
                     response = send_message(message, sock, ack_num, seq_num)
 
+
                     if response == b'ACK1':
                         time.sleep(4)
                         print(f"\nACK1 received from server! Message received successfuly! (seq_num: {seq_num})\n")
                         sock.sendall("ACK1c".encode())
                         time.sleep(2)
                         print(f"ACK1c sent to server. (seq_num: {seq_num})\n")
+                    elif response == b'payload_error':
+                        print("Message exceeds pay load. Packet dumped, sent a shorter message.")
+                if menu_input.lower() == '2':
+                    response = send_message(sock, seq_num)
 
                 if menu_input.lower() == '4':
                     ack_num = 4 
@@ -60,8 +69,7 @@ def create_client(host=socket.gethostname(), port=12345):
 
                     else:
                         print(f"No ACK, resending. (seq_num: {seq_num})\n")
-                if menu_input.lower() == '2':
-                    response = send_message(sock, seq_num)
+                
                 
                 seq_num += 1
                 time.sleep(4)
