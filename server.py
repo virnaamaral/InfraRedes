@@ -61,7 +61,6 @@ def handle_client(client_socket):
             time.sleep(2)
             print(f"ACK1 sent to client! Data recieved with sucess! (seq_num: {seq_num})\n")
             
-
             ack_from_client = client_socket.recv(1024)
             
             if ack_from_client.decode() == "ACK1c":

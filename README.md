@@ -31,6 +31,55 @@ confiável de dados, descritas abaixo em [Funcionalidades](#funcionalidades)
 
 ## Protocolo de Aplicação
 
+Aqui definimos e explicamos o desenvolvimento das regras e procedimentos que o Cliente e o Servidor seguirão para comunicar-se efetivamente, garantindo um transporte confiável de dados sobre uma rede que pode estar sujeita a perdas de dados e erros.
+
+Abaixo, temos cada elemento que deve ser considerado segundo o protocolo desenvolvido:
+
+1. **Conexão e Endereçamento**: O Cliente se conecta ao Servidor utilizando o host local `socket.gethostname()` e a porta 12345 por padrão, conforme especificado nos códigos `create_server()` e `create_client()`. Isso significa que a comunicação ocorre na mesma máquina, a menos que você especifique um IP diferente para o *host*.
+Porém, o `socket.gethostname()` faz com que, de forma automática, a porta do Servidor seja uma aleatória da máquina, esperarando por conexões (server_socket.bind((host, port))).
+
+    - Parâmetros e Valores Default:
+      - `host = socket.gethostname()`:
+        > *host* é um parâmetro que especifica o endereço IP ou o nome do *host* em que o Servidor deve operar
+
+        > `socket.gethostname()` retorna o nome do *host* no qual o Python está sendo executado, que é então resolvido para um endereço IP quando o *socket* é criado e vinculado, significando que o Servidor será acessível neste endereço de *host*
+        
+        > Esse valor padrão permite que a função seja chamada sem especificar explicitamente um host, fazendo com que o servidor opere na máquina local
+
+      - `port = 12345`:
+        > *port* é um parâmetro que especifica a porta TCP na qual o Servidor estará ouvindo
+        
+        > O número *12345* é um valor padrão para a porta se nenhum outro for especificado no momento da chamada da função
+
+      - `timeout = 45`:
+        > *timeout* é um parâmetro que define um limite de tempo (em segundos) que o servidor esperará por uma conexão antes de gerar uma exceção de *timeout* se nenhuma conexão for estabelecida
+
+        > O valor *45* é um valor padrão, indicando que o servidor esperará por conexões durante 45 segundos antes de desistir temporariamente
+
+2. **Formato das Mensagens**: O formato das mensagens inclui um cabeçalho definido pelo arquivo `header.py`. O cabeçalho possui os seguintes campos:
+    - Número de sequência (*seq_num*): identifica a ordem das mensagens
+    - Número de reconhecimento (*ack_num*): confirma o recebimento de mensagens
+    - Flags: utilizadas para controle de fluxo e detecção de erros
+    - Soma de verificação (*checksum*): verifica a integridade dos dados
+    - Comprimento do payload (*payload_len*): indica o tamanho dos dados enviados
+
+    > *Além do cabeçalho, as mensagens contêm dados de payload, como mensagens de texto digitadas pelo usuário*
+
+3. **Início e Término da Comunicação**: A comunicação é iniciada quando o Cliente se conecta ao Servidor usando `sock.connect((host, port))`, portanto a conexão estabelecida já inicia a comunicação. Já o término da comunicação pode ocorrer quando o usuário escolhe a opção *0* para encerrar o Cliente (`menu_input.lower() == '0'`)
+    > A conexão é fechada quando o Cliente encerra
+
+4. **Controle de Fluxo e Erro**:
+    - Soma de Verificação: A soma de verificação é calculada utilizando a função `calculate_checksum(data)` no Cliente e verificada no Servidor, para garantir a integridade dos dados
+    - Temporizador: São usados para gerenciar timeouts. O Servidor define um *timeout* para aceitar conexões `client_socket.settimeout(45)` e o `cliente usa time.sleep()` para esperar antes de retransmitir, em caso de erros
+    - Número de Sequência e Reconhecimento: Os números de sequência são atribuídos às mensagens para identificar sua ordem, sendo os reconhecimentos utilizados para confirmar o recebimento das mensagens pelo servidor, incluindo o envio de *ACK1* ou *ACK4* dependendo do estado da mensagem recebida
+    - Janela de Transmissão: 
+
+5. **Simulação de Falhas**: É feita através das opções no menu do Cliente.
+    - A opção *2* simula um pacote perdido, enquanto a opção *4* simula um pacote não íntegro, ambos feitos deliberadamente para testar o comportamento do protocolo em situações de erro
+    - A falha de integridade é simulada alterando o *checksum* do pacote no servidor `if ack_num == 4: checksum = checksum + 1`
+
+6. **Configuração do Servidor para Respostas**: O Servidor responde ao Cliente com mensagens de *ACK1* ou *ACK4* para confirmar o recebimento e integridade das mensagens, utilizadas pelo Cliente para determinar se a mensagem foi entregue com sucesso ou se precisa ser retransmitida.
+
 ## Explicando os Arquivos
 
 ### `server.py`
