@@ -10,33 +10,69 @@ def send_message(message, sock, ack_num, seq_num):
         max_payload_size = 1024  # Tamanho máximo que seu servidor pode lidar por pacote
         if len(payload) > max_payload_size:
             return b'payload_error'
-        
-        packet = header + payload 
+        packet = header + payload + b'\n'
         sock.sendall(packet)
         print(f"\nSent packet with header: {header} and payload: {payload}")
         response = sock.recv(1024)  # Recebe a resposta do servidor
         return response
     except socket.timeout:
-        print(f"\nTimeout: O servidor não respondeu a tempo. (seq_num: {seq_num})\n")
+        print(f"\nTimeout: Server did not respond. (seq_num: {seq_num})\n")
         return None
 
-def create_message():
-    return
+def create_message(message, sock, ack_num, seq_num):
+    payload = message.encode('utf-8') 
+    checksum = calculate_checksum(payload) 
+    header = pack_header(seq_num, ack_num, 0b00000001, checksum, len(payload))  #pack_header(seq_num, ack_num, flags, checksum, payload_len)
+    max_payload_size = 1024  # Tamanho máximo que seu servidor pode lidar por pacote
+    if len(payload) > max_payload_size:
+        return b'payload_error'
+    packet = header + payload 
+    return packet
 
 def send_batch(messages, sock, ack_num, seq_start):
-    responses = []
+    batch_packets = b'' # inicializa como byte, como array n vai dar certo 
     seq_num = seq_start
     for message in messages:
-        response = send_message(message, sock, ack_num, seq_num)
-        if response is None:
-            print(f"\nTimeout sending message {seq_num}, resending...")
-            response = send_message(message, sock, ack_num, seq_num)
-        responses.append(response)
+        packet = create_message(message, sock, ack_num, seq_num) #cria os packets de todas as mensagens
+        if packet == b'payload_error':
+            return b'payload_error'
+        batch_packets += packet + b'\n' #da join aqui em todos os packets e os separa por \n
         seq_num += 1
         time.sleep(2)  # Aguarda um pouco entre as mensagens para simular paralelismo
-    return responses
+    sock.sendall(batch_packets)
+    print(f"\nSent batch packet")
+    response = sock.recv(1024)
+    return response
 
-def create_client(host=socket.gethostname(), port=12345, timeout = 5):
+def send_batch2(messages, sock, ack_num, seq_start):
+    batch_packets = b'' # inicializa como byte, como array n vai dar certo 
+    seq_num = seq_start
+    responses= []
+    for message in messages:
+        packet = create_message(message, sock, ack_num, seq_num) #cria os packets de todas as mensagens
+        if packet == b'payload_error':
+            return b'payload_error'
+        batch_packets += packet + b'\n' #da join aqui em todos os packets e os separa por \n
+        seq_num += 1
+        time.sleep(2)  # Aguarda um pouco entre as mensagens para simular paralelismo
+    sock.sendall(batch_packets)
+    print(f"\nSent batch packet")
+    current_seq = seq_start
+    for _ in messages:
+        response = sock.recv(1024)
+        if response == b'ACK1':
+            time.sleep(4)
+            print(f"\nACK1 received from server! Message received successfuly! (seq_num: {current_seq})\n")
+            sock.sendall("ACK1c".encode())
+            time.sleep(2)
+            print(f"\nACK1c sent to server. (seq_num: {seq_num})\n")
+        elif response == b'payload_error':
+            print("\nMessage exceeds pay load. Packet dumped, sent a shorter message.")
+        current_seq += 1 
+    return response
+                        
+
+def create_client(host=socket.gethostname(), port=12345, timeout = 10):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.connect((host, port))
         sock.settimeout(timeout)
@@ -64,23 +100,44 @@ def create_client(host=socket.gethostname(), port=12345, timeout = 5):
                         time.sleep(2)
                         print(f"\nACK1c sent to server. (seq_num: {seq_num})\n")
                     elif response == b'payload_error':
-                        print("\nMessage exceeds pay load. Packet dumped, sent a shorter message.")
+                        print("\nMessage exceeds pay load. Packet dumped, sent a shorter message.\n")
 
                 if menu_input.lower() == '2':
-                    num_messages = int(input("Digite o número de mensagens a enviar: "))
-                    messages = [input(f"Digite a mensagem {i + 1}: ") for i in range(num_messages)]
-                    ack_num = 1
-                    responses = send_batch(messages, sock, ack_num, seq_num)
-                    for i, response in enumerate(responses):
-                        if response == b'ACK1':
-                            print(f"\nACK1 received from server for message {i + 1}. Message received successfully! (seq_num: {seq_num})")
-                            sock.sendall('ACK1c'.encode('utf-8'))
-                            time.sleep(2)
-                            print(f"\nACK1c sent to server for message {i + 1}. (seq_num: {seq_num})\n")
-                        elif response == b'payload_error':
-                            print(f"\nMessage {i + 1} exceeds payload. Packet dumped, sent a shorter message.")
-                        else:
-                            print(f"No ACK received for message {i + 1}, resending. (seq_num: {seq_num})\n")
+                    response_type = input("\nInforme como deseja receber a resposta:\n1 - Resposta por cada mensagem enviada\n2 - Unica resposta pelo batch\nDigite sua opção: ")
+                    
+                    if response_type == '1':
+                        ack_num = 0 #novo  pra simular 1 resposta por mensagem
+                        num_messages = int(input("\nDigite o número de mensagens a enviar: "))
+                        messages = [input(f"\nDigite a mensagem {i + 1}: ") for i in range(num_messages)]
+                        response = send_batch2(messages, sock, ack_num, seq_num)
+
+                        if response == b'payload_error':
+                            print("\nMessage exceeds pay load. Packet dumped, sent a shorter message.")
+                            
+                    else:
+                        ack_num = 2 #ack_para receber em uma response só. 
+                        num_messages = int(input("Digite o número de mensagens a enviar: "))
+                        messages = [input(f"Digite a mensagem {i + 1}: ") for i in range(num_messages)]
+                        response = send_batch(messages, sock, ack_num, seq_num)
+
+                    if response == b'ACK1':
+                        time.sleep(4)
+                        print(f"\nACK1 received from server! Message received successfuly! (seq_num: {seq_num})\n")
+                        sock.sendall("ACK1c".encode())
+                        time.sleep(2)
+                        print(f"\nACK1c sent to server. (seq_num: {seq_num})\n")
+                    elif response == b'ACKALL':
+                        time.sleep(4)
+                        print(f"\nACKALLc received from server! Message received successfuly! (seq_num: {seq_num})\n")
+                        sock.sendall("ACKALLc".encode())
+                        time.sleep(2)
+                        print(f"\nACKALLc sent to server. (seq_num: {seq_num})\n")
+
+                    elif response == b'payload_error':
+                        print("\nMessage exceeds pay load. Packet dumped, sent a shorter message.")
+                        
+                    seq_num = seq_num + num_messages
+                    
 
                     #vc recever confirmação por mensagem ou por grupo?
                     # while para receber mesnagem
@@ -131,6 +188,8 @@ def create_client(host=socket.gethostname(), port=12345, timeout = 5):
                             sock.sendall("ACK1c".encode())
                             time.sleep(2)
                             print(f"\nACK1c sent to server. (seq_num: {seq_num})\n")
+                    elif response == b'payload_error':
+                        print("\nMessage exceeds pay load. Packet dumped, sent a shorter message.")
 
                     else:
                         print(f"\nNo ACK, resending. (seq_num: {seq_num})\n")
