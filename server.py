@@ -19,7 +19,6 @@ def server_listen(server_socket):
             print(f"Error: {e}")
             break
 
-
 def handle_client(client_socket):
     try:
         while True:
@@ -68,18 +67,24 @@ def handle_client(client_socket):
                 
                 ack_from_client = client_socket.recv(1024)
                 
-                if ack_from_client.decode() == "ACK1c":
+                if ack_from_client.decode('utf-8') == 'ACK1c':
                     time.sleep(4)
                     print(f"ACK1c received from client, proceeding to the next packet. (seq_num: {seq_num})\n")
-
                 else:
                     print(f"Unexpected response or no ACK1 received send it again. (seq_num: {seq_num})\n")
-
+                    ack_from_client = client_socket.recv(1024)  # Aguarda novamente pelo ACK1c
+                    if ack_from_client.decode('utf-8') == 'ACK1c':
+                        time.sleep(4)
+                        print(f"ACK1c received from client, proceeding to the next packet. (seq_num: {seq_num})\n")
+                    else:
+                        print(f"No ACK1c received, closing connection. (seq_num: {seq_num})\n")
+                        break
     except socket.timeout:
-        print("Client inactive, closing connection.")
+        print("\nClient inactive, closing connection.")
     finally:
+        print("\nClosing client connection")
         client_socket.close()
-        print("Socket closed.")
+        print("\nSocket closed.")
 
 def create_server(host=socket.gethostname(), port=12345, timeout=120):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
