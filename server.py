@@ -23,7 +23,7 @@ def handle_client(client_socket):
     try:
         raw_buffer= b""
         while True:
-            flag_timeout_client = 0
+            
             data = client_socket.recv(1024)
 
             if not data:
@@ -48,23 +48,29 @@ def handle_client(client_socket):
             else: # se qtd pacotes
                 window_len += 1  '''
 
-
             while True:
+                
                 if not buffer:  # Verifica se o buffer está vazio
-                    print("Empty Buffer, no message do process. Type next Message.\n")
+                    #print("Empty Buffer, no message do process. Type next Message.\n")
                     break 
 
                 if len(buffer) < header_size:
                     print("Header compromised. Packet discarted, Type next Message\n")
                     break
+                flag_timeout_client = 0
 
                 header_data = buffer[:header_size] #pega primeira parte do cabeçalho
+
+                '''
+                print(f"header: {header_data}\n")
+                print(f"buffer: {buffer}\n")
+                '''
 
                 seq_num, ack_num, flags, checksum, payload_len = unpack_header(header_data)
 
                 total_packet_size = header_size + payload_len
                 if len(buffer) < total_packet_size:
-                    print ("payload completo nao foi recebido")
+                    print ("Packet incomplete and will be discarted. Send it again.\n")
                     break
 
                 payload = buffer[header_size:total_packet_size] #faz o slice da mensagem
@@ -79,17 +85,24 @@ def handle_client(client_socket):
                 if ack_num == 2: 
                     flag_timeout_client = 1
                     flag_batch = 1
+                    #debug
+                    #print(f"checksum ack_num2= {checksum}\nrecieved_checksum: {received_checksum}")
                     if checksum != received_checksum:
                         time.sleep(2)
                         print(f"Checksum error, corrupt package! (seq_num: {seq_num})\n")
                         client_socket.sendall(b'ACK4')
                         time.sleep(2)
                         print(f"ACK4 sent to cliente! Packet compromised! (seq_num: {seq_num})\n")
+                        
+                        '''#debug
+                        data = payload.decode('utf-8')
+                        print(f"Received data: {data} (seq_num: {seq_num})\n")
+                        '''
                         continue
+                        
                     data = payload.decode('utf-8')
                     print(f"Received data: {data} (seq_num: {seq_num})\n")
-                    #break
-                    
+                
                     
                 if ack_num == 1:
                     flag_timeout_client = 0
@@ -99,12 +112,18 @@ def handle_client(client_socket):
                     checksum = checksum + 1
 
                 if flag_timeout_client == 0:
+                    #print(f"checksum ack_num1= {checksum}\nrecieved_checksum: {received_checksum}")
                     if checksum != received_checksum:
                         time.sleep(2)
                         print(f"Checksum error, corrupt package! (seq_num: {seq_num})\n")
                         client_socket.sendall(b'ACK4')
                         time.sleep(2)
                         print(f"ACK4 sent to cliente! Packet compromised! (seq_num: {seq_num})\n")
+
+                        #debug
+                        '''data = payload.decode('utf-8')
+                        print(f"Received data: {data} (seq_num: {seq_num})\n")
+                        '''
                         break
 
                     #time.sleep(2)
@@ -131,6 +150,7 @@ def handle_client(client_socket):
                     
 
                 buffer = buffer[total_packet_size:]
+                #print(f" buffer final= {buffer}")
 
             if flag_batch == 1:
                     client_socket.sendall(b'ACKALL')
@@ -141,15 +161,15 @@ def handle_client(client_socket):
                     
                     if ack_from_client.decode('utf-8') == 'ACKALLc':
                         time.sleep(4)
-                        print(f"ACKALLc received from client, proceeding to the next packet. (seq_num: {seq_num})\n")
+                        print(f"ACKALLc received from client, proceeding to the next packet.\n")
                     else:
-                        print(f"Unexpected response or no ACKALL received send it again. (seq_num: {seq_num})\n")
+                        print(f"Unexpected response or no ACKALL received send it again.\n")
                         ack_from_client = client_socket.recv(1024)  # Aguarda novamente pelo ACK1c
                         if ack_from_client.decode('utf-8') == 'ACKALLc':
                             time.sleep(4)
-                            print(f"ACKALLc received from client, proceeding to the next packet. (seq_num: {seq_num})\n")
+                            print(f"ACKALLc received from client, proceeding to the next packet.\n")
                         else:
-                            print(f"No ACKALLc received, closing connection. (seq_num: {seq_num})\n")
+                            print(f"No ACKALLc received, closing connection.\n")
                             break
 
     except socket.timeout:
