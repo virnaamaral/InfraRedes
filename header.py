@@ -5,7 +5,10 @@ header_size = struct.calcsize(header_format)
 
 
 def calculate_checksum(data):
-    return sum(data) % 256
+    checksum = 0
+    for i, byte in enumerate(data):
+        checksum += (byte * (i + 1)) % 256
+    return checksum % 256
 
 
 def pack_header(seq_num, ack_num, flags, checksum, payload_len):

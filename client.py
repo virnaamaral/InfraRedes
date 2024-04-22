@@ -53,14 +53,12 @@ def send_batch_response_per_packet(messages, sock, ack_num, seq_start,window_siz
     seq_num = seq_start
     total_messages = len(messages)
     index = 0
-
-    print(f'\nTamanho da janela: {window_size}\n')
     
     while index < total_messages: 
         window_end = min(index + window_size, total_messages)
         batch_packets = b''
 
-        print(f'Início da Janela Enviando mensagens {index + 1} a {window_end}')
+        print(f'Início da Janela Enviando mensagens.')
 
         for i in range(index, window_end):
             packet = create_message(messages[i], sock, ack_num, seq_num)
@@ -82,10 +80,10 @@ def send_batch_response_per_packet(messages, sock, ack_num, seq_start,window_siz
                 time.sleep(2)
                 print(f"ACK1c sent to server. (seq_num: {current_seq})\n")
             elif response == b'payload_error':
-                print("Message exceeds pay load. Packet dumped, sent a shorter message.")
+                print("Message exceeds pay load. Packet dumped, sent a shorter message.\n")
             current_seq += 1 
 
-        print(f'Fim da Janela')
+        print(f'Fim da Janela\n')
 
         index += window_size
 
@@ -98,8 +96,7 @@ def create_client(host=socket.gethostname(),
         sock.settimeout(timeout)
         try:
             seq_num = 100
-            window_size = random.randint(2,
-                                         4)
+            window_size = 3
 
             while True:
                             
