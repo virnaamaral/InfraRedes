@@ -1,5 +1,6 @@
 import socket
 import time
+import random
 from header import pack_header, calculate_checksum
 
 def send_message(message, sock, ack_num, seq_num):
@@ -93,7 +94,7 @@ def create_client(host=socket.gethostname(), port=12345, timeout = 13):
         sock.settimeout(timeout)
         try:
             seq_num = 100
-            window_size = 3
+            window_size = random.randint(3, 6)
 
             while True:
                             
@@ -125,7 +126,7 @@ def create_client(host=socket.gethostname(), port=12345, timeout = 13):
                     
                     if response_type == '1':
                         ack_num = 1 #novo  pra simular 1 resposta por mensagem
-                        num_messages = int(input("\nDigite o número de mensagens a enviar: \n"))
+                        num_messages = int(input("\nDigite o número de mensagens a enviar: "))
                         messages = [input(f"\nDigite a mensagem {i + 1}: ") for i in range(num_messages)]
                         response = send_batch_response_per_packet(messages, sock, ack_num, seq_num, window_size)
 
