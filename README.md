@@ -62,9 +62,9 @@ confiável de dados, descritas abaixo em [Funcionalidades](#funcionalidades)
 
 - **Reconhecimento negativo**: É o tipo de resposta enviada pelo destinatário para indicar que houve um problema na recepção dos dados.
 
-- **Em Construção...**
-  - _**Janela e paralelismo**_: É um conceito usado para limitar o número de pacotes que podem ser enviados sem aguardar um reconhecimento, o que permite um certo paralelismo na transmissão de dados, fazendo com que o remetente envie vários pacotes antes de receber um reconhecimento.
-  - _**Método de checagem de integridade**_: Métodos usados para garantir que os dados transmitidos não tenham sido corrompidos ou alterados durante a transmissão.
+- **Janela e paralelismo**: Usado para limitar o número de pacotes que podem ser enviados sem aguardar um reconhecimento, o que permite um certo paralelismo na transmissão de dados, fazendo com que o remetente envie vários pacotes antes de receber um reconhecimento.
+
+- _**Método de checagem de integridade**_: Métodos usados para garantir que os dados transmitidos não tenham sido corrompidos ou alterados durante a transmissão.
 
 ## Protocolo de Aplicação
 
@@ -109,7 +109,8 @@ Porém, o `socket.gethostname()` faz com que, de forma automática, a porta do S
     - *Soma de Verificação*: A soma de verificação é calculada utilizando a função `calculate_checksum(data)` no Cliente e verificada no Servidor, para garantir a integridade dos dados
     - *Temporizador*: São usados para gerenciar timeouts. O Servidor define um *timeout* para aceitar conexões `flag_timeout_client = 0` e o cliente, ao ser cirado, define um timeout limite para esperar antes de retransmitir, em caso de erros
     - *Número de Sequência e Reconhecimento*: Os números de sequência são atribuídos às mensagens para identificar sua ordem, sendo os reconhecimentos utilizados para confirmar o recebimento das mensagens pelo servidor, incluindo o envio de *ACK1* ou *ACK4* dependendo do estado da mensagem recebida
-    - *Janela de Transmissão*: 
+    - *Janela de Transmissão*: O Cliente pode enviar as mensagens que desejar, mas a janela limita a quantidade de mensagens que serão efetivamente enviadas ao servidor, ou seja, só será enviado mais mensagens se receber a confirmação do servidor para as mensagens anteriores. O tamanho da janela pode ser definido de diferentes formas, como por quantidade de bytes do buffer, mas no caso específico é limitado pela quantidade de mensagens. Isso significa que, se a janela estiver definida como 3 e o cliente enviar 5 mensagens, o sistema irá processar as 3 primeiras mensagens e só depois processará as outras duas, pois a janela permite o envio de até 3 mensagens de uma vez.
+
 
 5. **Simulação de Falhas**: É feita através das opções no menu do Cliente.
     - A opção 4 simula um pacote não íntegro, feito deliberadamente para testar o comportamento do protocolo em situações de erro

@@ -3,7 +3,6 @@ import threading
 import time
 from header import unpack_header, header_size, calculate_checksum
 
-
 def server_listen(server_socket):
     server_socket.listen(5)
     print("Server listening for connections...\n")
@@ -19,7 +18,6 @@ def server_listen(server_socket):
         except Exception as e:
             print(f"Error: {e}")
             break
-
 
 def handle_client(client_socket):
     try:
@@ -160,14 +158,12 @@ def handle_client(client_socket):
                         else:
                             print(f"No ACKALLc received, closing connection.\n")
                             break
-
     except socket.timeout:
         print("\nClient inactive, closing connection.\n")
     finally:
         print("\nClosing client connection")
         client_socket.close()
         print("\nSocket closed.")
-
 
 def create_server(host=socket.gethostname(), port=12345, timeout=120):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -177,7 +173,6 @@ def create_server(host=socket.gethostname(), port=12345, timeout=120):
     listener_thread = threading.Thread(target=server_listen, args=(server_socket,))
     listener_thread.start()
     listener_thread.join()
-
 
 if __name__ == '__main__':
     create_server()

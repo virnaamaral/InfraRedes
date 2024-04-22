@@ -3,7 +3,6 @@ import time
 import random
 from header import pack_header, calculate_checksum
 
-
 def send_message(message, sock, ack_num, seq_num):
     try:
         payload = message.encode('utf-8') 
@@ -21,7 +20,6 @@ def send_message(message, sock, ack_num, seq_num):
         print(f"\nTimeout: Server did not respond. (seq_num: {seq_num})\n")
         return None
 
-
 def create_message(message, sock, ack_num, seq_num):
     payload = message.encode('utf-8') 
     checksum = calculate_checksum(payload) 
@@ -31,7 +29,6 @@ def create_message(message, sock, ack_num, seq_num):
         return b'payload_error'
     packet = header + payload 
     return packet
-
 
 def send_batch(messages, sock, ack_num, seq_start):
     batch_packets = b''
@@ -47,7 +44,6 @@ def send_batch(messages, sock, ack_num, seq_start):
     print(f"\nSent batch packet")
     response = sock.recv(1024)
     return response
-
 
 def send_batch_response_per_packet(messages, sock, ack_num, seq_start,window_size):
     seq_num = seq_start
@@ -86,7 +82,6 @@ def send_batch_response_per_packet(messages, sock, ack_num, seq_start,window_siz
         print(f'Fim da Janela\n')
 
         index += window_size
-
 
 def create_client(host=socket.gethostname(),
                   port=12345,
@@ -213,7 +208,6 @@ def create_client(host=socket.gethostname(),
         finally:
             print("\nClosing connection")
             sock.close()
-
 
 if __name__ == '__main__':
     create_client()
