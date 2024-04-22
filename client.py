@@ -44,41 +44,59 @@ def send_batch(messages, sock, ack_num, seq_start):
     response = sock.recv(1024)
     return response
 
-def send_batch_response_per_packet(messages, sock, ack_num, seq_start):
-    batch_packets = b'' # inicializa como byte, como array n vai dar certo 
+def send_batch_response_per_packet(messages, sock, ack_num, seq_start,window_size):
     seq_num = seq_start
-    for message in messages:
-        packet = create_message(message, sock, ack_num, seq_num) #cria os packets de todas as mensagens
-        if packet == b'payload_error':
-            return b'payload_error'
-        batch_packets += packet + b'\n' #da join aqui em todos os packets e os separa por \n
-        seq_num += 1
-        time.sleep(2)  # Aguarda um pouco entre as mensagens para simular paralelismo
-    sock.sendall(batch_packets)
-    print(f"\nSent batch packet\n")
-    current_seq = seq_start
-    for _ in messages:
-        response = sock.recv(1024)
-        if response == b'ACK1':
-            time.sleep(4)
-            print(f"ACK1 received from server! Message received successfuly! (seq_num: {current_seq})\n")
-            sock.sendall("ACK1c".encode())
-            time.sleep(2)
-            print(f"ACK1c sent to server. (seq_num: {current_seq})\n")
-        elif response == b'payload_error':
-            print("Message exceeds pay load. Packet dumped, sent a shorter message.")
-        current_seq += 1 
+    total_messages = len(messages)
+    index = 0
+
+    print(f'\nTamanho da janela: {window_size}\n')
+    
+    while index < total_messages: 
+        window_end = min(index + window_size, total_messages)
+        batch_packets = b'' # inicializa como byte, como array n vai dar certo 
+
+        print(f'Início da Janela Enviando mensagens {index + 1} a {window_end}')
+
+        for i in range(index, window_end):
+            packet = create_message(messages[i], sock, ack_num, seq_num) #cria os packets de todas as mensagens
+            if packet == b'payload_error':
+                return b'payload_error'
+            batch_packets += packet + b'\n' #da join aqui em todos os packets e os separa por \n
+            seq_num += 1
+            #time.sleep(2)  # Aguarda um pouco entre as mensagens para simular paralelismo
+        
+        sock.sendall(batch_packets)
+        print(f"\nSent batch packet {seq_num - (window_end - index)} to {seq_num - 1}\n\n")
+
+        current_seq = seq_num - (window_end - index)
+        for _ in range (index, window_end):
+            response = sock.recv(1024)
+            if response == b'ACK1':
+                time.sleep(4)
+                print(f"ACK1 received from server! Message received successfuly! (seq_num: {current_seq})\n")
+                sock.sendall("ACK1c".encode())
+                time.sleep(2)
+                print(f"ACK1c sent to server. (seq_num: {current_seq})\n")
+            elif response == b'payload_error':
+                print("Message exceeds pay load. Packet dumped, sent a shorter message.")
+            current_seq += 1 
+
+        print(f'Fim da Janela')
+        
+        index += window_size
     
                         
 
-def create_client(host=socket.gethostname(), port=12345, timeout = 10):
+def create_client(host=socket.gethostname(), port=12345, timeout = 13):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.connect((host, port))
         sock.settimeout(timeout)
         try:
             seq_num = 100
-            
+            window_size = 3
+
             while True:
+                            
                 num_messages=0
                 menu_input = input("\nEscolha uma opção:\n1 - para enviar uma mensagem íntegra\n"
                                    "2 - para simular e paralelismo\n3 - para simular o timeout no cliente\n"
@@ -109,7 +127,7 @@ def create_client(host=socket.gethostname(), port=12345, timeout = 10):
                         ack_num = 1 #novo  pra simular 1 resposta por mensagem
                         num_messages = int(input("\nDigite o número de mensagens a enviar: \n"))
                         messages = [input(f"\nDigite a mensagem {i + 1}: ") for i in range(num_messages)]
-                        response = send_batch_response_per_packet(messages, sock, ack_num, seq_num)
+                        response = send_batch_response_per_packet(messages, sock, ack_num, seq_num, window_size)
 
                         if response == b'payload_error':
                             print("Message exceeds pay load. Packet dumped, sent a shorter message.\n")

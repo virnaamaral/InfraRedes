@@ -21,8 +21,13 @@ def server_listen(server_socket):
 
 def handle_client(client_socket):
     try:
-        raw_buffer= b""
+        
         while True:
+            raw_buffer= b""
+            buffer = b""
+            packet_count = 0
+            flag_batch = 0
+            window_size = 2
             
             data = client_socket.recv(1024)
 
@@ -31,22 +36,13 @@ def handle_client(client_socket):
                 break
             
             raw_buffer += data
-            buffer = b""
-            packet_count = 0
-            window_len = 5
-            flag_batch = 0
 
             while b'\n' in raw_buffer:
                 # Extrai um pacote delimitado pelo '\n'
                 raw_packet, raw_buffer = raw_buffer.split(b'\n', 1)
                 packet_count += 1  # Incrementa o contador de pacotes
                 buffer += raw_packet #cria um array dos pacotes crus sem o \n
- 
-            '''if packet_count > window_len: #se qtd pacotes for maior que a janela
-                if window_len >1: # e janela for maior que 1
-                    window_len -= 1 # diminui 1
-            else: # se qtd pacotes
-                window_len += 1  '''
+
 
             while True:
                 
@@ -80,7 +76,8 @@ def handle_client(client_socket):
                 if ack_num == 3:
                     flag_timeout_client = 1
                     print("Sleeping for timeout...\n")
-                    time.sleep(11)
+                    packet_count -= 1
+                    time.sleep(14)
 
                 if ack_num == 2: 
                     flag_timeout_client = 1
@@ -117,6 +114,7 @@ def handle_client(client_socket):
                         time.sleep(2)
                         print(f"Checksum error, corrupt package! (seq_num: {seq_num})\n")
                         client_socket.sendall(b'ACK4')
+                        packet_count -= 1
                         time.sleep(2)
                         print(f"ACK4 sent to cliente! Packet compromised! (seq_num: {seq_num})\n")
 
@@ -155,7 +153,7 @@ def handle_client(client_socket):
             if flag_batch == 1:
                     client_socket.sendall(b'ACKALL')
                     time.sleep(2)
-                    print(f"ACKALL sent to client! Data recieved with sucess! (seq_num: {seq_num})\n")
+                    print(f"ACKALL sent to client! Data recieved with sucess!\n")
                     
                     ack_from_client = client_socket.recv(1024)
                     
@@ -173,7 +171,7 @@ def handle_client(client_socket):
                             break
 
     except socket.timeout:
-        print("\nClient inactive, closing connection.")
+        print("\nClient inactive, closing connection.\n")
     finally:
         print("\nClosing client connection")
         client_socket.close()
