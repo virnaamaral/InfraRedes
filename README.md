@@ -1,6 +1,61 @@
 # Projeto Infraestrutura de Comunicação
 Projeto desenvolvido para a disciplina de Infraestrutura de Comunicação, na graduação em Ciência da Computação na [CESAR School](https://www.cesar.school)
 
+## 💻 Grupo 4:
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/anabxalves">
+        <img src="https://avatars.githubusercontent.com/u/108446826?v=4" width="100px;" alt="Foto Ana"/><br>
+        <sub>
+          <b>Ana Beatriz Alves</b>
+        </sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Caiobadv">
+        <img src="https://avatars.githubusercontent.com/u/117755420?v=4" width="100px;" alt="Foto Caio"/><br>
+        <sub>
+          <b>Caio Barreto</b>
+        </sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Criismnaga">
+        <img src="https://avatars.githubusercontent.com/u/104402971?v=4" width="100px;" alt="Foto Cris"/><br>
+        <sub>
+          <b>Cristina Matsunaga</b>
+        </sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/DaviMauricio">
+        <img src="https://avatars.githubusercontent.com/u/71526685?v=4" width="100px;" alt="Foto Davi"/><br>
+        <sub>
+          <b>Davi Maurício</b>
+        </sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/FernandaFBMarques">
+        <img src="https://avatars.githubusercontent.com/u/101741395?v=4" width="100px;" alt="Foto Nanda"/><br>
+        <sub>
+          <b>Maria Fernanda Marques</b>
+        </sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/virnaamaral">
+        <img src="https://avatars.githubusercontent.com/u/116957619?v=4" width="100px;" alt="Foto Virnas"/><br>
+        <sub>
+          <b>Virna Amaral</b>
+        </sub>
+      </a>
+    </td>
+  </tr>
+</table>
+<br>
+
 ## 🧐 O que é?
 
 Uma aplicação Cliente-Servidor que, na camada de Aplicação, fornece um transporte confiável de dados, considerando um canal com perdas de dados e erros.
@@ -42,8 +97,8 @@ confiável de dados, descritas abaixo em [Funcionalidades](#funcionalidades)
     >- O cliente enviará mensagens de acordo com suas escolhas no menu
 
 6. **Encerrando a Execução**:
-    > O Cliente será encerrado ao digitar *0* no menu
-    >- O servidor e o cliente serão encerrados, e mensagens indicando o fechamento da conexão serão mostradas nos respectivos terminais
+    > O Cliente será encerrado ao digitar *0* no menu, e ao esperarmos 45 segundos, o Servidor também é encerrado se não houver novas conexões de Clientes durante esse período.
+    >- Atendendo a essas duas condições, ambos, Servidor e Cliente, serão encerrados, e mensagens indicando o fechamento da conexão serão mostradas nos respectivos terminais
 
 ## Funcionalidades
 
@@ -160,58 +215,3 @@ Utiliza a biblioteca *struct* para empacotar e desempacotar os dados de acordo c
 > `pack_header(seq_num, ack_num, flags, checksum, payload_len)`: Empacota os campos do cabeçalho em um formato específico.
 
 > `unpack_header(header_bytes)`: Desempacota os dados do cabeçalho a partir de bytes recebidos.
-
-## 💻 Grupo 4:
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/anabxalves">
-        <img src="https://avatars.githubusercontent.com/u/108446826?v=4" width="100px;" alt="Foto Ana"/><br>
-        <sub>
-          <b>Ana Beatriz Alves</b>
-        </sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/Caiobadv">
-        <img src="https://avatars.githubusercontent.com/u/117755420?v=4" width="100px;" alt="Foto Caio"/><br>
-        <sub>
-          <b>Caio Barreto</b>
-        </sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/Criismnaga">
-        <img src="https://avatars.githubusercontent.com/u/104402971?v=4" width="100px;" alt="Foto Cris"/><br>
-        <sub>
-          <b>Cristina Matsunaga</b>
-        </sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/DaviMauricio">
-        <img src="https://avatars.githubusercontent.com/u/71526685?v=4" width="100px;" alt="Foto Davi"/><br>
-        <sub>
-          <b>Davi Maurício</b>
-        </sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/FernandaFBMarques">
-        <img src="https://avatars.githubusercontent.com/u/101741395?v=4" width="100px;" alt="Foto Nanda"/><br>
-        <sub>
-          <b>Maria Fernanda Marques</b>
-        </sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/virnaamaral">
-        <img src="https://avatars.githubusercontent.com/u/116957619?v=4" width="100px;" alt="Foto Virnas"/><br>
-        <sub>
-          <b>Virna Amaral</b>
-        </sub>
-      </a>
-    </td>
-  </tr>
-</table>
-<br></br>
